@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: bran
+  name: bran
+  labels:
+    app: bran
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bran
+  template:
+    metadata:
+      labels:
+        app: bran
+    spec:
+      containers:
+      - name: bran-container
+        image: niket50/bran:v1
+        ports:
+        - containerPort: 8000
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bran-secret
+              key: SECRET_KEY
+
