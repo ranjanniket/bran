@@ -58,7 +58,7 @@ pipeline {
 
         stage('Deploy to container') {
             steps {
-                sh 'docker run --rm -d -p 8000:8000 -e SECRET_KEY="django-insecure-8j=hrs#^z0t%#1^89isbgqeddf2_zwzh45rz-=h&u%ze)o3e" -e DEBUG="True" -e ALLOWED_HOSTS="*" niket50/bran:latest'
+                sh 'kubectl apply -f Kubernetes/*'
             }
         }
     }

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-bran
+data:
+  "SECRET_KEY": "django-insecure-8j=hrs#^z0t%#1^89isbgqeddf2_zw!#zh45rz-=h&u%ze)o3e"
+  "ALLOWED_HOSTS": "*"
+  "DEBUG": "true"
+  "TIME_ZONE": "UTC"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bran-secret
+  namespace: bran
+data:
+  SECRET_KEY: ZGphbmdvLWluc2VjdXJlLThqPWhycyNeejB0JSMxXjg5aXNiZ3FlZGRmMl96d3poNDVyei09aCZ1JXplKW8zZQ==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: bran
+  name: bran-deployment
+  labels:
+    app: bran
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bran
+  template:
+    metadata:
+      labels:
+        app: bran
+    spec:
+      containers:
+      - name: bran-container
+        image: niket50/bran:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: bran-secret
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: bran-service
+  namespace: bran
+spec:
+  selector:
+    app: bran
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: NodePort
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: bran
+  name: bran-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bran-deployment
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: bran
+  name: bran-ingress
+spec:
+  rules:
+  - host: ec2-65-2-186-48.ap-south-1.compute.amazonaws.com
+    http:
+      paths:
+      - path: /bran/*
+        pathType: Prefix
+        backend:
+          service:
+            name: bran-service
+            port:
+              number: 8000
+
