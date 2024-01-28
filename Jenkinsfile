@@ -39,28 +39,22 @@ pipeline {
             }
         }
         stage("Docker Build & Push") {
-                    steps {
-                        script {
-                            withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                                sh "docker build -t niket50/bran:v1 ."
-                                sh "docker tag niket50/bran:v1 niket50/bran:latest"
-                                sh "docker push niket50/bran:latest"
-                            }
-                        }
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "docker build -t niket50/bran:${BUILD_NUMBER} ."
+                        sh "docker push niket50/bran:${BUILD_NUMBER}"
                     }
                 }
+            }
+        }
 
         stage("TRIVY") {
             steps {
-                sh "trivy image -f json -o trivyimage.txt niket50/bran:latest"
+                sh "trivy image -f json -o trivyimage.txt niket50/bran:${BUILD_NUMBER}"
             }
         }
 
-        stage('Deploy to container') {
-            steps {
-                sh 'kubectl apply -f Kubernetes/*'
-            }
-        }
     }
 
     post {
