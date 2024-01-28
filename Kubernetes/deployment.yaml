@@ -23,12 +23,4 @@ spec:
         envFrom:
         - secretRef:
             name: bran-secret
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
 
