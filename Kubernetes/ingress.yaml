@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: bran
+  name: bran-ingress
+spec:
+  rules:
+  - host: ec2-65-2-186-48.ap-south-1.compute.amazonaws.com
+    http:
+      paths:
+      - path: /hodr/*
+        pathType: Prefix
+        backend:
+          service:
+            name: hodr-service
+            port:
+              number: 80
+      - path: /bran/*
+        pathType: Prefix
+        backend:
+          service:
+            name: bran-service
+            port:
+              number: 8000
+

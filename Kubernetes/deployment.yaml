@@ -17,13 +17,18 @@ spec:
     spec:
       containers:
       - name: bran-container
-        image: niket50/bran:v1
+        image: niket50/bran:latest
         ports:
         - containerPort: 8000
-        env:
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: bran-secret
-              key: SECRET_KEY
+        envFrom:
+        - secretRef:
+            name: bran-secret
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8000
 
