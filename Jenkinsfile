@@ -38,26 +38,52 @@ pipeline {
                 sh "trivy fs . > trivyfs.txt"
             }
         }
-        stage("Docker Build & Push") {
+        stage("Docker Build ") {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "echo 'Buid Docker Image'"
                         sh "docker build -t niket50/bran:${BUILD_NUMBER} ."
+                    }
+                }
+            }
+        }
+
+        stage("Push Artifacts") {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "echo 'Push to Registry'"
                         sh "docker push niket50/bran:${BUILD_NUMBER}"
                     }
                 }
             }
         }
 
+
         stage("TRIVY") {
             steps {
                 sh "trivy image -f json -o trivyimage.txt niket50/bran:${BUILD_NUMBER}"
             }
         }
-        stage('Trigger ManifestUpdate') {
+        
+        stage('Clone & Update Deployment File') {
             steps {
-                echo "triggering updatemanifest hodr job"
-                build job: 'cd_bran', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                script {
+                    sh '''
+                        git clone git@github.com:ranjanniket/bran_manifest.git
+                        cd bran_manifest/
+                        pwd
+                        ls
+                        cat deployment.yaml
+                        sed -i 's/niket50\\/bran:.*/niket50\\/bran:${BUILD_NUMBER}/' deployment.yaml
+                        cat deployment.yaml
+                        git add deployment.yaml
+                        git commit -m 'Update image tag to ${BUILD_NUMBER}'
+                        git remote -v
+                        git push origin main
+                    '''      
+                }
             }
         }
 
