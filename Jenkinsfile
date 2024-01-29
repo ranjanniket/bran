@@ -76,7 +76,7 @@ pipeline {
                         pwd
                         ls
                         cat deployment.yaml
-                        sed -i 's/niket50\\/bran:.*/niket50\\/bran:${BuildNumber}/' deployment.yaml
+                        sed -i 's/niket50\\/bran:.*/niket50\\/bran:${Build_Number}/' deployment.yaml
                         cat deployment.yaml
                         git add deployment.yaml
                         git commit -m 'Update image tag to ${BUILD_NUMBER}'
